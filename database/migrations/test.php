@@ -1,23 +1,17 @@
-<x-app-layout>
-    {{-- ... slot header ... --}}
+<td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+    <a href="{{ route('users.show', $user->id) }}" class="text-green-600 hover:text-green-900 mr-4" title="Detail">
+        <i class="fas fa-eye"></i>
+    </a>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <form method="POST" action="{{ route('users.store') }}">
-                        @csrf
+    <a href="{{ route('users.edit', $user->id) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit">
+        <i class="fas fa-pencil-alt"></i>
+    </a>
 
-                        @if ($errors->any())
-                            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                                <strong class="font-bold">Oops! Terjadi kesalahan.</strong>
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        <div>
-                            <label for="name" class="block font-medium text-sm text-gray-700">Nama</label>
-                            {{-- ... sisa form ... --}}
+    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline-block ml-4" onsubmit="return confirm('Apakah Anda yakin?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </form>
+</td>

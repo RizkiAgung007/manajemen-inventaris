@@ -52,9 +52,11 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, User $user)
     {
-        //
+        $activities = $user->activityLogs()->latest()->paginate(15);
+
+        return view('users.show', compact('user', 'activities'));
     }
 
     /**

@@ -43,6 +43,15 @@ class ProductController extends Controller
             'desc'  => $request->desc,
         ]);
 
+        $product = Product::create($request->all());
+
+        // LOGGING
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Menambahkan produk baru: {$product->name}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header(('User-Agent')),
+        ]);
+
         return redirect()->route('products.index')->with('success', 'produk berhasil ditambahkan');
     }
 
@@ -81,15 +90,31 @@ class ProductController extends Controller
             'desc'  => $request->desc,
         ]);
 
+        $product->update($request->all());
+
+        // LOGGING
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Memperbarui produk: {$product->name}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header('User-Agent')
+        ]);
+
         return redirect()->route('products.index')->with('success', 'produk berhasil diupdate');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $product, string $id)
+    public function destroy(Product $product, Request $request)
     {
         $product->delete();
+
+        // LOGGING
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Menghapus produk: {$product->name}",
+            'ip_address'    => $request->id(),
+            'user_agent'    => $request->header('User-Agent')
+        ]);
 
         return redirect()->route('product.index')->with('success', 'produk berhasil dihapus');
     }
