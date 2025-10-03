@@ -49,18 +49,28 @@
                             </a>
                         </li>
 
-                        @if(in_array(Auth::user()->role, ['superadmin', 'admin']))
                         <li class="mt-4">
                             <span class="block py-2 px-4 text-xs uppercase text-gray-400 font-semibold">Manajemen</span>
                             <ul class="ml-2">
-                                <li>
-                                    <a href="{{ route('products.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700">
-                                        <i class="fas fa-box w-6 mr-2"></i> Produk
-                                    </a>
-                                </li>
+                                {{-- Menu Produk untuk Admin & Superadmin --}}
+                                @if(in_array(Auth::user()->role, ['superadmin', 'admin']))
+                                    <li>
+                                        <a href="{{ route('products.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700">
+                                            <i class="fas fa-box w-6 mr-2"></i> Produk
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Menu Pengguna HANYA untuk Superadmin --}}
+                                @if(Auth::user()->role == 'superadmin')
+                                    <li>
+                                        <a href="{{ route('users.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700">
+                                            <i class="fas fa-users w-6 mr-2"></i> Pengguna
+                                        </a>
+                                    </li>
+                                @endif
                             </ul>
                         </li>
-                        @endif
                     </ul>
                 </nav>
             </aside>
