@@ -25,9 +25,25 @@ class ReportController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $products = Product::with('category')->get();
         $physicalStocks = $request->input('physical_stock', []);
-        $timestamp = now()->format('Y-m-d_H-i-s');
+        $products = Product::with('category')->find(array_keys($physicalStocks));
+
+        DB::transaction(function () use ($products, $physicalStocks) {
+            // Buat record utama laporan
+            $stockOpname = StockOpname::create([
+                'user_id' => Auth::id(),
+                'status' => 'pending',
+            ]);
+
+            // Simpan detail setiap produk
+            foreach ($products as $product) {
+                $stockOpname->details()->create([
+                    'product_id' => $product->id,
+                    'system_stock' => $product->stock,
+                    'physical_stock' => $physicalStocks[$product->id] ?? null,
+                ]);
+            }
+        });
 
         $reportData = [];
         foreach ($products as $product) {
@@ -43,6 +59,7 @@ class ReportController extends Controller
             ];
         }
 
+        $timestamp = now()->format('Y-m-d_H-i-s');
         $pdf = PDF::loadView('reports.pdf', ['reportData' => $reportData]);
         return $pdf->download("laporan_stok_opname_{$timestamp}.pdf");
     }
