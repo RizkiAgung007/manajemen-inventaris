@@ -45,7 +45,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktivitas</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th>
+                                    <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP Address</th> -->
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu</th>
                                 </tr>
                             </thead>
@@ -53,7 +53,7 @@
                                 @forelse ($activities as $log)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $log->activity }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $log->ip_address }}</td>
+                                        <!-- <td class="px-6 py-4 whitespace-nowrap">{{ $log->ip_address }}</td> -->
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title="{{ $log->created_at->format('d F Y, H:i:s') }}">
                                             {{ $log->created_at->diffForHumans() }}
                                         </td>

@@ -10,7 +10,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
-    // Method untuk menampilkan halaman form stok opname
     public function index()
     {
         $products = Product::orderBy('name', 'asc')->get();
@@ -19,17 +18,17 @@ class ReportController extends Controller
 
     public function exportExcel()
     {
-        // ... (method ini tidak berubah)
+        $timestamp = now()->format('Y-m-d_H-i-s');
+
+        return Excel ::download(new ProductsExport, "laporan_produk_${timestamp}.xlsx");
     }
 
-    // Method untuk memproses & men-download laporan PDF
     public function exportPdf(Request $request)
     {
         $products = Product::with('category')->get();
-        $physicalStocks = $request->input('physical_stock', []); // Ambil data dari form
+        $physicalStocks = $request->input('physical_stock', []);
         $timestamp = now()->format('Y-m-d_H-i-s');
 
-        // Siapkan data untuk dikirim ke view PDF
         $reportData = [];
         foreach ($products as $product) {
             $physicalStock = $physicalStocks[$product->id] ?? null;

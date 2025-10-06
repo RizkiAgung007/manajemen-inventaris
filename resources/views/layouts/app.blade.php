@@ -15,7 +15,7 @@
         {{-- @import di app.css lebih disarankan --}}
     </head>
     <body class="font-sans antialiased">
-        <div x-data="{ sidebarOpen: true }" class="min-h-screen bg-gray-100">
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100">
 
             <button
                 x-show="!sidebarOpen"
@@ -32,47 +32,73 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="-translate-x-full"
-                class="w-64 bg-gray-800 text-white fixed inset-y-0 left-0 h-full z-20 flex flex-col">
+                {{-- [PERBAIKAN] Tambahkan class flex, flex-col, dan h-full --}}
+                class="w-64 bg-gray-800 text-white fixed inset-y-0 left-0 z-20 flex flex-col">
 
                 <div class="flex items-center justify-between p-4 border-b border-gray-700">
-                    <h2 class="text-lg font-bold">Menu Inventaris</h2>
+                    <a href="{{ route('dashboard') }}"><h2 class="text-lg font-bold">Menu Inventaris</h2></a>
                     <button @click="sidebarOpen = false" class="p-2 rounded-md hover:bg-gray-700 focus:outline-none">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
 
-                <nav class="flex-1 p-4">
-                    <ul>
-                        <li>
-                            <a href="{{ route('dashboard') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700">
-                                <i class="fas fa-tachometer-alt w-6 mr-2"></i> Dashboard
-                            </a>
-                        </li>
+                <div class="flex-grow">
+                    <nav class="p-4">
+                        <ul>
+                            <li>
+                                <a href="{{ route('dashboard') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('dashboard') ? 'bg-gray-700' : '' }}">
+                                    <i class="fas fa-tachometer-alt w-6 mr-2"></i> Dashboard
+                                </a>
+                            </li>
 
-                        <li class="mt-4">
-                            <span class="block py-2 px-4 text-xs uppercase text-gray-400 font-semibold">Manajemen</span>
-                            <ul class="ml-2">
-                                {{-- Menu Produk untuk Admin & Superadmin --}}
-                                @if(in_array(Auth::user()->role, ['superadmin', 'admin']))
+                            <li class="mt-4">
+                                <span class="block py-2 px-4 text-xs uppercase text-gray-400 font-semibold">Manajemen</span>
+                                <ul class="ml-2 space-y-2">
+                                    @can('manage-content')
                                     <li>
-                                        <a href="{{ route('products.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700">
+                                        <a href="{{ route('products.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('products.*') ? 'bg-gray-700' : '' }}">
                                             <i class="fas fa-box w-6 mr-2"></i> Produk
                                         </a>
                                     </li>
-                                @endif
-
-                                {{-- Menu Pengguna HANYA untuk Superadmin --}}
-                                @if(Auth::user()->role == 'superadmin')
                                     <li>
-                                        <a href="{{ route('users.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700">
-                                            <i class="fas fa-users w-6 mr-2"></i> Pengguna
+                                        <a href="{{ route('categories.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('categories.*') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-layer-group w-6 mr-2"></i> Kategori
                                         </a>
                                     </li>
-                                @endif
-                            </ul>
-                        </li>
-                    </ul>
-                </nav>
+                                    @endcan
+                                </ul>
+                            </li>
+
+                            @can('create-reports')
+                            <li class="mt-4">
+                                <span class="block py-2 px-4 text-xs uppercase text-gray-400 font-semibold">Laporan</span>
+                                <ul class="ml-2 space-y-2">
+                                    <li>
+                                        <a href="{{ route('reports.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('reports.*') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-file-lines w-6 mr-2"></i> Buat Laporan
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            @endcan
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="p-4 border-t border-gray-700">
+                    <nav>
+                        <ul>
+                            @can('manage-users')
+                            <li>
+                                <a href="{{ route('users.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('users.*') ? 'bg-gray-700' : '' }}">
+                                    <i class="fas fa-users w-6 mr-2"></i> Manajemen User
+                                </a>
+                            </li>
+                            @endcan
+
+                        </ul>
+                    </nav>
+                </div>
             </aside>
 
             <div class="flex-1 transition-all duration-300" :class="{ 'ml-64': sidebarOpen, 'ml-0': !sidebarOpen }">
@@ -91,5 +117,6 @@
                 </main>
             </div>
         </div>
+        @stack('scripts')
     </body>
 </html>
