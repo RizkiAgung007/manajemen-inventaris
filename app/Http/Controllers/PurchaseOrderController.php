@@ -46,6 +46,8 @@ class PurchaseOrderController extends Controller
             'products.*.price'      => 'required|numeric|min:0',
         ]);
 
+        $purchaseOrder = null;
+
         try {
             DB::transaction(function () use ($validated) {
                 $purchaseOrder = PurchaseOrder::create([
@@ -65,6 +67,12 @@ class PurchaseOrderController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal membuat pesanan: ' . $e->getMessage())->withInput();
         }
+
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Menambahkan pembelian barang: {$purchaseOrder->id}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header('User-Agent'),
+        ]);
 
         return redirect()->route('purchase-orders.index')->with('success', 'Pesanan pembelian baru berhasil dibuat.');
     }
@@ -129,6 +137,12 @@ class PurchaseOrderController extends Controller
             return back()->with('error', 'Gagal memperbarui pesanan: ' . $e->getMessage())->withInput();
         }
 
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Mengedit pembelian barang: {$purchaseOrder->id}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header('User-Agent'),
+        ]);
+
         return redirect()->route('purchase-orders.index', $purchaseOrder)->with('success', 'Pesanan pembelian berhasil diperbarui.');
     }
 
@@ -142,6 +156,12 @@ class PurchaseOrderController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus pesanan: ' . $e->getMessage());
     }
+
+    auth()->user()activityLogs()->create([
+        'activity'      => "Menghapus pembelian barang: {$purchaseOrder->id}",
+        'ip_address'    => $request->ip(),
+        'user_agent'    => $request->header('User-Agent'),
+    ]);
 
     return redirect()->route('purchase-orders.index')->with('success', 'Pesanan pembelian berhasil dihapus.');
     }
@@ -164,6 +184,12 @@ class PurchaseOrderController extends Controller
             $purchaseOrder->status = 'completed';
             $purchaseOrder->save();
         });
+
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Menghapus pembelian barang: {$purchaseOrder->id}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header('User-Agent'),
+        ]);
 
         return redirect()->route('purchase-orders.show', $purchaseOrder)->with('success', 'Pesanan berhasil diterima dan stok berhasil diupdate.');
     }
