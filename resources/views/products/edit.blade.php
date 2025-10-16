@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Edit Produk') }}
+                {{ __('Edit Produk: ') . $product->name }}
             </h2>
             <a href="{{ route('products.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                 Kembali
@@ -13,74 +13,118 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <form method="POST" action="{{ route('products.update', $product->id) }}" enctype="multipart/form-data">
-                        @csrf
-                        @method('PATCH')
+                <form method="POST" action="{{ route('products.update', $product->id) }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PATCH')
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                        <!-- Nama Produk -->
-                        <div>
-                            <label for="name" class="block font-medium text-sm text-gray-700">Nama Produk</label>
-                            <input id="name" type="text" name="name" value="{{ old('name', $product->name) }}" required
-                                   class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        </div>
-
-                        <!-- Kategori -->
-                        <div class="mt-4">
-                            <label for="category_id" class="block font-medium text-sm text-gray-700">Kategori</label>
-                            <select name="category_id" id="category_id" class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option value="">Pilih Kategori</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Deskripsi -->
-                        <div class="mt-4">
-                            <label for="desc" class="block font-medium text-sm text-gray-700">Deskripsi</label>
-                            <textarea id="desc" name="desc" rows="4"
-                                      class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('desc', $product->desc) }}</textarea>
-                        </div>
-
-                        <!-- Uplaod gambar -->
-                        <div class="mt-4">
-                            <label for="image" class="block font-medium text-sm text-gray-700">Gambar Produk (Opsional)</label>
-                            @if ($product->image)
-                                <div class="my-2">
-                                    <p class="text-sm text-gray-500 mb-1">Gambar Saat Ini:</p>
-                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-48 h-48 object-cover rounded-md">
+                            {{-- Kolom Kiri: Info Dasar --}}
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="name" class="block font-medium text-sm text-gray-700">Nama Produk</label>
+                                    <input id="name" type="text" name="name" value="{{ old('name', $product->name) }}" required autofocus class="block mt-1 w-full rounded-md shadow-sm border-gray-300 @error('name') border-red-500 @enderror">
+                                    @error('name') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
                                 </div>
-                            @endif
-                            <input id="image" type="file" name="image"
-                                   class="block mt-1 w-full rounded-md shadow-sm border border-gray-300 p-2 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <p class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah gambar.</p>
-                        </div>
 
-                        <!-- Stok & Harga -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                            <div>
-                                <label for="stock" class="block font-medium text-sm text-gray-700">Stok</label>
-                                <input id="stock" type="number" name="stock" value="{{ old('stock', $product->stock) }}" required
-                                       class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
-                            <div>
-                                <label for="price" class="block font-medium text-sm text-gray-700">Harga</label>
-                                <input id="price" type="number" name="price" step="100" value="{{ old('price', $product->price) }}" required
-                                       class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
-                        </div>
+                                {{-- Kategori --}}
+                                <div>
+                                    <label for="categories" class="block font-medium text-sm text-gray-700">Kategori</label>
+                                    <select id="categories" name="categories[]" multiple placeholder="Pilih satu atau lebih kategori..." autocomplete="off" class="block w-full @error('categories') border-red-500 @enderror">
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}" {{ (in_array($category->id, old('categories', $product->categories->pluck('id')->toArray()))) ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('categories') <p class="mt-2 text-sm text-red-600">Kolom kategori wajib diisi.</p> @enderror
+                                </div>
 
-                        <div class="flex items-center justify-end mt-6">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
-                                Simpan Perubahan
-                            </button>
+                                {{-- Supplier --}}
+                                <div>
+                                    <label for="suppliers" class="block font-medium text-sm text-gray-700">Pemasok (Opsional)</label>
+                                    <select id="suppliers" name="suppliers[]" multiple placeholder="Pilih satu atau lebih pemasok..." autocomplete="off" class="block w-full @error('suppliers') border-red-500 @enderror">
+                                        @foreach ($suppliers as $supplier)
+                                            <option value="{{ $supplier->id }}" {{ (in_array($supplier->id, old('suppliers', $product->suppliers->pluck('id')->toArray()))) ? 'selected' : '' }}>
+                                                {{ $supplier->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('suppliers') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+                                </div>
+
+                                <div>
+                                    <label for="desc" class="block font-medium text-sm text-gray-700">Deskripsi</label>
+                                    <textarea id="desc" name="desc" rows="4" class="block mt-1 w-full rounded-md shadow-sm border-gray-300">{{ old('desc', $product->desc) }}</textarea>
+                                </div>
+                            </div>
+
+                            {{-- Kolom Kanan: Inventaris & Gambar --}}
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="price" class="block font-medium text-sm text-gray-700">Harga</label>
+                                        <input id="price" type="number" name="price" step="100" value="{{ old('price', $product->price) }}" required class="block mt-1 w-full rounded-md shadow-sm border-gray-300 @error('price') border-red-500 @enderror">
+                                        @error('price') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div>
+                                        <label for="stock" class="block font-medium text-sm text-gray-700">Stok</label>
+                                        <input id="stock" type="number" name="stock" value="{{ old('stock', $product->stock) }}" required class="block mt-1 w-full rounded-md shadow-sm border-gray-300 @error('stock') border-red-500 @enderror">
+                                        @error('stock') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                </div>
+
+                                <div x-data="{ imageUrl: '{{ $product->image ? asset('storage/' . $product->image) : null }}' }">
+                                    <label class="block font-medium text-sm text-gray-700">Gambar Produk</label>
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                        <div class="space-y-1 text-center">
+                                            <template x-if="imageUrl">
+                                                <img :src="imageUrl" class="mx-auto h-32 w-auto object-cover rounded-md shadow-sm">
+                                            </template>
+                                            <template x-if="!imageUrl">
+                                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </template>
+                                            <div class="flex text-sm text-gray-600">
+                                                <label for="image" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                                    <span>Ubah gambar</span>
+                                                    <input id="image" name="image" type="file" class="sr-only" @change="imageUrl = URL.createObjectURL($event.target.files[0])">
+                                                </label>
+                                                <p class="pl-1">atau tarik dan lepas</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500">Kosongkan jika tidak ingin mengubah gambar.</p>
+                                        </div>
+                                    </div>
+                                    @error('image') <p class="mt-2 text-sm text-red-600">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="p-6 bg-gray-50 border-t flex justify-end items-center space-x-4">
+                        <a href="{{ route('products.index') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50">Batal</a>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                            <i class="fa-solid fa-save mr-2"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            new TomSelect('#categories',{
+                plugins: ['remove_button'],
+                create: false,
+            });
+
+            new TomSelect('#suppliers',{
+                plugins: ['remove_button'],
+                create: false,
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

@@ -15,15 +15,31 @@ class DashboardController extends Controller
         $totalProducts = Product::count();
         $totalCategories = Category::count();
         $totalUsers = User::count();
-        $lowStockProducts = Product::where('stock', '<', 10)->count();
+        $lowStockProductsCount = Product::where('stock', '<', 10)->count();
         $inventoryValue = Product::sum(DB::raw('price * stock'));
+
+        $categoryDistribution = Category::withCount('products')->orderBy('products_count', 'desc')->get();
+        $categoryLabels = $categoryDistribution->pluck('name');
+        $categoryData = $categoryDistribution->pluck('products_count');
+
+        $lowestStockProducts = Product::orderBy('stock', 'asc')->take(5)->get();
+        $lowestStockLabels = $lowestStockProducts->pluck('name');
+        $lowestStockData = $lowestStockProducts->pluck('stock');
+
+        $recentProducts = Product::with('categories')->latest()->take(5)->get();
 
         return view('dashboard', compact(
             'totalProducts',
             'totalCategories',
             'totalUsers',
-            'lowStockProducts',
-            'inventoryValue'
+            'lowStockProductsCount',
+            'inventoryValue',
+            'categoryLabels',
+            'categoryData',
+            'lowestStockProducts',
+            'lowestStockLabels',
+            'lowestStockData',
+            'recentProducts'
         ));
     }
 }

@@ -9,12 +9,19 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name'
-    ];
+    protected $guarded = ['id'];
+
+    // protected $fillable = [
+    //     'name'
+    // ];
 
     public function products()
     {
-        return $this->hasMany(Product::class);
+        return $this->belongsToMany(Product::class);
+    }
+
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class);
     }
 }

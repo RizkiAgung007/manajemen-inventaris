@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Traits\ManagesStock;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    use ManagesStock;
+
     /**
      * Display a listing of the resource.
      */
@@ -16,7 +20,7 @@ class ProductController extends Controller
     {
         $categories = Category::orderBy('name', 'asc')->get();
 
-        $query = Product::with('category');
+        $query = Product::with('categories', 'suppliers');
 
         // Mencari nama produk
         if ($request->filled('search')) {
@@ -25,7 +29,9 @@ class ProductController extends Controller
 
         // Mencari berdasarkan kategori
         if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('categories.id', $request->category);
+            });
         }
 
         // Sort
@@ -60,8 +66,9 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $categories = Category::all();
-        return view('products.create', compact('categories'));
+        $categories = Category::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
+        return view('products.create', compact('categories', 'suppliers'));
     }
 
     /**
@@ -70,15 +77,15 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'stock'       => 'required|integer|min:0',
-            'price'       => 'required|numeric|min:0',
-            'desc'        => 'nullable|string',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
-        ], [
-            'category_id.required' => 'Anda harus memilih kategori.',
-            'image.max' => 'Ukuran gambar tidak boleh lebih dari 10MB.'
+            'name'          => 'required|string|max:255',
+            'stock'         => 'required|integer|min:0',
+            'price'         => 'required|numeric|min:0',
+            'desc'          => 'nullable|string',
+            'image'         => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
+            'categories'    => 'required|array',
+            'categories.*'  => 'exists:categories,id',
+            'suppliers'     => 'required|array',
+            'suppliers.*'   => 'exists:suppliers,id'
         ]);
 
         if ($request->hasFile('image')) {
@@ -86,7 +93,22 @@ class ProductController extends Controller
             $validatedData['image'] = $imagePath;
         }
 
-        $product = Product::create($validatedData);
+        $product = Product::create([
+            'name'  => $validatedData['name'],
+            'price' => $validatedData['price'],
+            'stock' => $validatedData['stock'],
+            'desc'  => $validatedData['desc'] ?? null,
+            'image' => $validatedData['image'] ?? null,
+        ]);
+
+        $product->categories()->sync($validatedData['categories']);
+        $product->suppliers()->sync($validatedData['suppliers']);
+
+        if ($product->stock > 0) {
+            $this->recordStockMovement($product, $product->stock, 'stok_awal', [
+                'notes' => 'Stok awal saat dibuat'
+            ]);
+        }
 
         // LOGGING
         auth()->user()->activityLogs()->create([
@@ -103,7 +125,10 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return view('products.show', compact('product'));
+        $product->load('categories', 'suppliers');
+        $stockMovements = $product->stockMovements()->with('user')->paginate(10);
+
+        return view('products.show', compact('product', 'stockMovements'));
     }
 
     /**
@@ -111,8 +136,10 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        $categories = Category::all();
-        return view('products.edit', compact('product', 'categories'));
+        $categories = Category::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
+        $product->load('categories', 'suppliers');
+        return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
     /**
@@ -120,17 +147,21 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        // dd($request->all());
+
         $validatedData = $request->validate([
             'name'        => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
             'stock'       => 'required|integer|min:0',
             'price'       => 'required|numeric|min:0',
             'desc'        => 'nullable|string',
             'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:10240',
-        ], [
-            'category_id.required' => 'Anda harus memilih kategori.',
-            'image.max' => 'Ukuran gambar tidak boleh lebih dari 10MB.'
+            'categories'  => 'required|array',
+            'categories.*'=> 'exists:categories,id',
+            'suppliers'   => 'nullable|array',
+            'suppliers.*' => 'exists:suppliers,id',
         ]);
+
+        $oldStock = $product->stock;
 
         if ($request->hasFile('image')) {
             if ($product->image) {
@@ -141,6 +172,18 @@ class ProductController extends Controller
         }
 
         $product->update($validatedData);
+
+        $product->categories()->sync($validatedData['categories']);
+        $product->suppliers()->sync($validatedData['suppliers'] ?? []);
+
+        $newStock = $product->fresh()->stock;
+
+        if ($oldStock !== $newStock) {
+            $quantityChange = $newStock - $oldStock;
+            $this->recordStockMovement($product, $quantityChange, 'penyesuaian_manual', [
+                'notes' => 'Stok diubah.'
+            ], false);
+        }
 
         // LOGGING
         auth()->user()->activityLogs()->create([

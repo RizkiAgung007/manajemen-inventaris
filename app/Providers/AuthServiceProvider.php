@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
+use App\Models\StockOpname;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -37,6 +38,11 @@ class AuthServiceProvider extends ServiceProvider
         // Gate untuk User: hanya bisa membuat laporan (dan melihat data).
         Gate::define('create-reports', function (User $user) {
             return $user->role === 'user';
+        });
+
+        // Gate untuk User: User yang membuat akan menerima dan dapat mendownload laporan
+        Gate::define('view-report', function (User $user, StockOpname $stockOpname) {
+            return $user->id === $stockOpname->user_id || in_array($user->role, ['superadmin', 'admin']);
         });
     }
 }

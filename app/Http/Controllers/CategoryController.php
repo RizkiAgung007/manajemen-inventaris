@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Supplier;
+use Illuminate\Validation\Rule;
 
 class CategoryController extends Controller
 {
@@ -12,9 +14,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::latest()->get();
+    $categories = Category::withCount('products')->with('suppliers')->latest()->paginate(15);
 
-        return view('categories.index', compact('categories'));
+    // dd($categories->first());
+    return view('categories.index', compact('categories'));
     }
 
     /**
@@ -22,7 +25,8 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('categories.create');
+        $suppliers = Supplier::orderBy('name')->get();
+        return view('categories.create', compact('suppliers'));
     }
 
     /**
@@ -30,25 +34,25 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name'  => 'required|string|max:255|unique:categories,name'
-        ], [
-            'name.required' => 'Nama kategori tidak boleh kosong.',
-            'name.unique'   => 'Nama ketegori ini sudah ada.'
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:categories',
+            'suppliers' => 'nullable|array',
+            'suppliers.*' => 'exists:suppliers,id',
         ]);
 
-        $newCategory = Category::create([
-            'name'  => $request->name,
-        ]);
+        $category = Category::create(['name' => $validatedData['name']]);
 
-        //LOGGING
+        if ($request->has('suppliers')) {
+            $category->suppliers()->sync($validatedData['suppliers']);
+        }
+
         auth()->user()->activityLogs()->create([
-            'activity'      => "Menambahkan kategori baru: {$newCategory->name}",
-            'ip_address'    => $request->ip(),
-            'user_agent'    => $request->header(('User-Agent')),
+            'activity'   => "Menambahkan kategori baru: {$category->name}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Kategori berhasil ditambahkan.');
+        return redirect()->route('categories.index')->with('success', 'Kategori baru berhasil ditambahkan.');
     }
 
     /**
@@ -56,6 +60,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        $category->load('products.supplier', 'suppliers');
         return view('categories.show', compact('category'));
     }
 
@@ -64,7 +69,9 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('categories.edit', compact('category'));
+        $suppliers = Supplier::orderBy('name')->get();
+        $category->load('suppliers');
+        return view('categories.edit', compact('category', 'suppliers'));
     }
 
     /**
@@ -72,31 +79,28 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        $request->validate([
-            'name'  => 'required|string|max:255|unique:categories,name'
-        ], [
-            'name.required' => 'Nama kategori tidak boleh kosong.',
-            'name.unique'   => 'Nama kategori ini sudah ada.'
+        $validatedData = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('categories')->ignore($category->id)],
+            'suppliers' => 'nullable|array',
+            'suppliers.*' => 'exists:suppliers,id',
         ]);
 
-        $category->update([
-            'name' => $request->name
-        ]);
+        $category->update(['name' => $validatedData['name']]);
+        $category->suppliers()->sync($request->suppliers ?? []);
 
-        // LOGGING
         auth()->user()->activityLogs()->create([
-            'activity'      => "Memperbarui kategori: {$category->name}",
-            'ip_address'    => $request->ip(),
-            'user_agent'    => $request->header(('User-Agent')),
+            'activity'   => "Memperbarui kategori: {$category->name}",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->header('User-Agent'),
         ]);
 
-        return redirect()->route('categories.index')->with('success', 'Ketgori berhasil diupdate');
+        return redirect()->route('categories.index')->with('success', 'Kategori berhasil diupdate.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy(Request $request, Category $category)
     {
 
         $deleteCategory = $category->name;
@@ -105,8 +109,8 @@ class CategoryController extends Controller
         // LOGGING
         auth()->user()->activityLogs()->create([
             'activity'      => "Menghapus kategori: {$deleteCategory}",
-            'ip_address'    => request()->ip(),
-            'user_agent'    => request()->header(('User-Agent')),
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header(('User-Agent')),
         ]);
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus');

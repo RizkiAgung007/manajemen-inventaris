@@ -12,7 +12,6 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        {{-- @import di app.css lebih disarankan --}}
     </head>
     <body class="font-sans antialiased">
         <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100">
@@ -32,7 +31,6 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="-translate-x-full"
-                {{-- [PERBAIKAN] Tambahkan class flex, flex-col, dan h-full --}}
                 class="w-64 bg-gray-800 text-white fixed inset-y-0 left-0 z-20 flex flex-col">
 
                 <div class="flex items-center justify-between p-4 border-b border-gray-700">
@@ -65,6 +63,26 @@
                                             <i class="fa-solid fa-layer-group w-6 mr-2"></i> Kategori
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="{{ route('suppliers.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('suppliers.*') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-truck-field w-6 mr-2"></i>Supplier
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('purchase-orders.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('purchase-orders.*') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-cart-shopping w-6 mr-2"></i> Pesanan Pembelian
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('reviews.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('reviews.*') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-clipboard-check w-6 mr-2"></i>Review Laporan
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('stock-out.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('stock-out.create') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-arrow-right-from-bracket w-6 mr-2"></i> Barang Keluar
+                                        </a>
+                                    </li>
                                     @endcan
                                 </ul>
                             </li>
@@ -74,8 +92,13 @@
                                 <span class="block py-2 px-4 text-xs uppercase text-gray-400 font-semibold">Laporan</span>
                                 <ul class="ml-2 space-y-2">
                                     <li>
-                                        <a href="{{ route('reports.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('reports.*') ? 'bg-gray-700' : '' }}">
-                                            <i class="fa-solid fa-file-lines w-6 mr-2"></i> Buat Laporan
+                                        <a href="{{ route('reports.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('reports.index') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-file-circle-plus w-6 mr-2"></i> Buat Laporan Baru
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('reports.my') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('reports.my') ? 'bg-gray-700' : '' }}">
+                                            <i class="fa-solid fa-list-check w-6 mr-2"></i> Riwayat Laporan Saya
                                         </a>
                                     </li>
                                 </ul>
@@ -92,6 +115,11 @@
                             <li>
                                 <a href="{{ route('users.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('users.*') ? 'bg-gray-700' : '' }}">
                                     <i class="fas fa-users w-6 mr-2"></i> Manajemen User
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('logs.index') }}" class="flex items-center py-2 px-4 rounded hover:bg-gray-700 {{ request()->routeIs('users.*') ? 'bg-gray-700' : '' }}">
+                                    <i class="fa-solid fa-timeline w-6 mr-2"></i>Log Aktivitas
                                 </a>
                             </li>
                             @endcan

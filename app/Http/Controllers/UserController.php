@@ -24,7 +24,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        $roles = ['superadmin', 'admin', 'user'];
+        return view('users.create', compact('roles'));
     }
 
     /**
@@ -36,7 +37,7 @@ class UserController extends Controller
             'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'password'  => ['required', Rules\Password::defaults()],
-            'role'      => ['required', 'in:admin,user'],
+            'role'      => ['required', 'in:superadmin,admin,user'],
         ]);
 
         User::create([
@@ -54,7 +55,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $activities = $user->activityLogs()->latest()->paginate(15);
+        $activities = $user->activityLogs()->latest()->paginate(10, ['*'], 'activities_page');
 
         return view('users.show', compact('user', 'activities'));
     }
@@ -64,7 +65,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        $roles = ['superadmin', 'admin', 'user'];
+        return view('users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -76,7 +78,7 @@ class UserController extends Controller
             'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'password'  => ['nullable', Rules\Password::defaults()],
-            'role'      => ['required', 'in:admin,user'],
+            'role'      => ['required', 'in:superadmin,admin,user'],
         ]);
 
         $data = $request->only('name', 'email', 'role');
