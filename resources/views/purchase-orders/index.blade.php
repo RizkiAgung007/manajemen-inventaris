@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Pesanan Pembelian (Purchase Orders)') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
                     @if (session('success'))
@@ -25,28 +25,28 @@
                         @endcan
                     </div>
 
-                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <div class="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     {{-- Menggabungkan kolom Pemasok & User --}}
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pesanan</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Pesanan</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Tanggal</th>
                                     {{-- Menambahkan kolom Total Nilai --}}
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Nilai</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Total Nilai</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 ">
                                 @forelse ($purchaseOrders as $order)
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900">{{ $loop->iteration }} - {{ $order->supplier->name }}</div>
-                                            <div class="text-sm text-gray-500">Oleh: {{ $order->user->name }}</div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $loop->iteration }} - {{ $order->supplier->name }}</div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-300">Oleh: {{ $order->user->name }}</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 align-middle">{{ $order->created_at->format('d M Y') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium align-middle">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 align-middle">{{ $order->created_at->format('d M Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300 font-medium align-middle">
                                             Rp {{ number_format($order->total_value, 0, ',', '.') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap align-middle">
@@ -54,17 +54,17 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium align-middle">
                                             <div class="flex items-center justify-center space-x-2">
-                                                <a href="{{ route('purchase-orders.show', $order->id) }}" class="p-2 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-100" title="Detail">
+                                                <a href="{{ route('purchase-orders.show', $order->id) }}" class="p-2 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-100 hover:dark:bg-gray-700" title="Detail">
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
                                                 @can('manage-content')
-                                                    <a href="{{ route('purchase-orders.edit', $order->id) }}" class="p-2 text-gray-400 hover:text-yellow-600 rounded-md hover:bg-yellow-100" title="Edit" >
+                                                    <a href="{{ route('purchase-orders.edit', $order->id) }}" class="p-2 text-gray-400 hover:text-yellow-600 rounded-md hover:bg-yellow-100 hover:dark:bg-gray-700" title="Edit" >
                                                         <i class="fa-solid fa-pencil"></i>
                                                     </a>
                                                     <form action="{{ route('purchase-orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');" class="inline-block">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-100" title="Hapus">
+                                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-100 dark:hover:bg-gray-700" title="Hapus">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>

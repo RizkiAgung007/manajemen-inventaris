@@ -60,7 +60,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        $category->load('products.supplier', 'suppliers');
+        $category->load('products.suppliers', 'suppliers');
         return view('categories.show', compact('category'));
     }
 
@@ -110,7 +110,7 @@ class CategoryController extends Controller
         auth()->user()->activityLogs()->create([
             'activity'      => "Menghapus kategori: {$deleteCategory}",
             'ip_address'    => $request->ip(),
-            'user_agent'    => $request->header(('User-Agent')),
+            'user_agent'    => $request->header('User-Agent'),
         ]);
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus');

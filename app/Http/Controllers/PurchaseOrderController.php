@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Traits\ManagesStock;
@@ -49,7 +50,7 @@ class PurchaseOrderController extends Controller
         $purchaseOrder = null;
 
         try {
-            DB::transaction(function () use ($validated) {
+            DB::transaction(function () use ($validated, $purchaseOrder) {
                 $purchaseOrder = PurchaseOrder::create([
                     'supplier_id' => $validated['supplier_id'],
                     'user_id'     => Auth::id(),
@@ -69,7 +70,7 @@ class PurchaseOrderController extends Controller
         }
 
         auth()->user()->activityLogs()->create([
-            'activity'      => "Menambahkan pembelian barang: {$purchaseOrder->id}",
+            'activity'      => "Menambahkan pembelian barang: {$purchaseOrder->name}",
             'ip_address'    => $request->ip(),
             'user_agent'    => $request->header('User-Agent'),
         ]);
@@ -117,7 +118,7 @@ class PurchaseOrderController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($validated, $purchaseOrder) {
+            DB::transaction(function () use ($validated, &$purchaseOrder) {
                 $purchaseOrder->update([
                     'supplier_id' => $validated['supplier_id'],
                     'notes'       => $validated['notes'],
@@ -138,7 +139,7 @@ class PurchaseOrderController extends Controller
         }
 
         auth()->user()->activityLogs()->create([
-            'activity'      => "Mengedit pembelian barang: {$purchaseOrder->id}",
+            'activity'      => "Mengedit pembelian barang: {$purchaseOrder->name}",
             'ip_address'    => $request->ip(),
             'user_agent'    => $request->header('User-Agent'),
         ]);
@@ -149,7 +150,7 @@ class PurchaseOrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PurchaseOrder $purchaseOrder)
+    public function destroy(PurchaseOrder $purchaseOrder, Request $request)
     {
         try {
             $purchaseOrder->delete();
@@ -157,13 +158,13 @@ class PurchaseOrderController extends Controller
             return back()->with('error', 'Gagal menghapus pesanan: ' . $e->getMessage());
     }
 
-    auth()->user()activityLogs()->create([
-        'activity'      => "Menghapus pembelian barang: {$purchaseOrder->id}",
-        'ip_address'    => $request->ip(),
-        'user_agent'    => $request->header('User-Agent'),
-    ]);
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Menghapus pembelian barang: {$purchaseOrder->name}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header('User-Agent'),
+        ]);
 
-    return redirect()->route('purchase-orders.index')->with('success', 'Pesanan pembelian berhasil dihapus.');
+        return redirect()->route('purchase-orders.index')->with('success', 'Pesanan pembelian berhasil dihapus.');
     }
 
     public function receive(Request $request, PurchaseOrder $purchaseOrder)
@@ -172,7 +173,7 @@ class PurchaseOrderController extends Controller
             return back()->with('error', 'Pesanan ini sudah diproses sebelumnya.');
         }
 
-        DB::transaction(function () use ($purchaseOrder) {
+        DB::transaction(function () use ($purchaseOrder, $request) {
             foreach ($purchaseOrder->products as $product) {
                 $quantityReceived = $product->pivot->quantity;
 
@@ -183,13 +184,13 @@ class PurchaseOrderController extends Controller
 
             $purchaseOrder->status = 'completed';
             $purchaseOrder->save();
-        });
 
-        auth()->user()->activityLogs()->create([
-            'activity'      => "Menghapus pembelian barang: {$purchaseOrder->id}",
-            'ip_address'    => $request->ip(),
-            'user_agent'    => $request->header('User-Agent'),
-        ]);
+            auth()->user()->activityLogs()->create([
+                'activity'      => "Menerima/Menyelesaikan pembelian barang: {$purchaseOrder->name}",
+                'ip_address'    => $request->ip(),
+                'user_agent'    => $request->header('User-Agent'),
+            ]);
+        });
 
         return redirect()->route('purchase-orders.show', $purchaseOrder)->with('success', 'Pesanan berhasil diterima dan stok berhasil diupdate.');
     }

@@ -55,7 +55,7 @@ class StockOpnameReviewController extends Controller
         });
 
         auth()->user()->activityLogs()->create([
-            'activity'      => "Menyetujui laporan stok opname: #{$stockOpname->id}",
+            'activity'      => "Menyetujui laporan stok opname: #{$stockOpname->name}",
             'ip_address'    => $request->ip(),
             'user_agent'    => $request->header('User-Agent'),
         ]);

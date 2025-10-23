@@ -1,24 +1,23 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Detail Laporan #{{ $stockOpname->id }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                {{-- Bagian Header Informasi Laporan --}}
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                {{-- Informasi Laporan --}}
                 <div class="p-6 border-b">
                     <h3 class="text-lg font-medium">Informasi Laporan</h3>
                     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <p><strong class="text-gray-600">ID Laporan:</strong> #{{ $stockOpname->id }}</p>
-                        <p><strong class="text-gray-600">Status:</strong>
-                            {{-- Menggunakan Blade Component untuk konsistensi --}}
+                        <p><strong class="text-gray-600 dark:text-gray-300">ID Laporan:</strong> #{{ $stockOpname->id }}</p>
+                        <p><strong class="text-gray-600 dark:text-gray-300">Status:</strong>
                             <x-status-badge :status="$stockOpname->status" />
                         </p>
-                        <p><strong class="text-gray-600">Dibuat Oleh:</strong> {{ $stockOpname->user->name }}</p>
-                        <p><strong class="text-gray-600">Tanggal:</strong> {{ $stockOpname->created_at->format('d M Y, H:i') }}</p>
+                        <p><strong class="text-gray-600 dark:text-gray-300">Dibuat Oleh:</strong> {{ $stockOpname->user->name }}</p>
+                        <p><strong class="text-gray-600 dark:text-gray-300">Tanggal:</strong> {{ $stockOpname->created_at->format('d M Y, H:i') }}</p>
                     </div>
                 </div>
 
@@ -26,8 +25,8 @@
                 <div class="p-6">
                      <h3 class="text-lg font-medium mb-4">Detail Perbandingan Stok</h3>
                      <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
                                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Stok Sistem</th>

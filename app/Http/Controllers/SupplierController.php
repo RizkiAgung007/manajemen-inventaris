@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
@@ -39,9 +40,30 @@ class SupplierController extends Controller
             'email'         => 'nullable|email|max:255',
             'phone'         => 'nullable|string|max:20',
             'address'       => 'nullable|string',
+            'categories'    => 'nullable|array',
+            'categories.*'  => 'exists:categories,id'
         ]);
 
-        Supplier::create($validatedData);
+        // Supplier::create($validatedData);
+        $supplier = null;
+
+        try {
+            DB::transaction(function () use ($validatedData, &$supplier, $request) {
+                $supplier = Supplier::create($validatedData);
+
+                if (!empty($validatedData['categories'])) {
+                    $supplier->categories()->sync($validatedData['categories']);
+                }
+
+                auth()->user()->activityLogs()->create([
+                    'activity'     => "Menambahkan supplier baru: {$supplier->name}",
+                    'ip_address'   => $request->ip(),
+                    'user_agent'   => $request->header('User-Agent')
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menambahkan supplier: ' . $e->getMessage())->withInput();
+        }
 
         return redirect()->route('suppliers.index')->with('success', 'Supplier baru berhasil ditambahkan.');
     }
@@ -51,7 +73,7 @@ class SupplierController extends Controller
      */
     public function show(Supplier $supplier)
     {
-        $supplier->load('products.category');
+        $supplier->load('products.categories');
 
         return view('suppliers.show', compact('supplier'));
     }
@@ -62,7 +84,8 @@ class SupplierController extends Controller
     public function edit(Supplier $supplier)
     {
         $categories = Category::orderBy('name')->get();
-        return view('suppliers.edit', compact('supplier'));
+        $supplier->load('categories');
+        return view('suppliers.edit', compact('supplier', 'categories'));
     }
 
     /**
@@ -79,8 +102,14 @@ class SupplierController extends Controller
         ]);
 
         $supplier->update($validatedData);
+        $supplier->categories()->sync($request->categories ?? []);
 
-        $supplier->categories()->sync($request->categpries ?? []);
+        // LOGGING
+        auth()->user()->activityLogs()->create([
+            'activity'      => "Mengedit supplier: {$supplier->name}",
+            'ip_address'    => $request->ip(),
+            'user_agent'    => $request->header('user-Agent')
+        ]);
 
         return redirect()->route('suppliers.index')->with('success', 'Data supplier berhasil diupdate.');
     }
@@ -88,8 +117,21 @@ class SupplierController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, Supplier $supplier)
     {
-        //
+        try {
+            $supplierName = $supplier->name;
+            $supplier->delete();
+
+            auth()->user()->activityLogs()->create([
+                'activity'      => "Menghapus supplier: {$supplierName}",
+                'ip_address'    => $request->ip(),
+                'user_agent'    => $request->header('User-Agent')
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus supplier: ' . $e->getMessage());
+        }
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier berhasil dihapus.');
     }
 }

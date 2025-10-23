@@ -1,10 +1,10 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('Informasi Profil') }}
         </h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
             {{ __("Perbarui informasi profil dan alamat email akun Anda.") }}
         </p>
     </header>
@@ -20,13 +20,13 @@
         {{-- Bagian Isi Form --}}
         <div class="mt-6 space-y-6 px-6">
             <div>
-                <x-input-label for="name" :value="__('Name')" />
+                <x-input-label for="name" :value="__('Name')" class="dark:text-gray-300"/>
                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
             </div>
 
             <div>
-                <x-input-label for="email" :value="__('Email')" />
+                <x-input-label for="email" :value="__('Email')" class="dark:text-gray-300"/>
                 <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <div class="p-6 mt-6 bg-gray-50 border-t flex justify-end items-center space-x-4">
+        <div class="p-6 mt-6 bg-gray-50 dark:bg-gray-800 border-t flex justify-end items-center space-x-4">
             {{-- Tombol Reset --}}
             <button type="reset" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50">
                 Reset

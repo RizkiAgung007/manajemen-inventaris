@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Detail Pesanan Pembelian #' . $purchaseOrder->id) }}
             </h2>
-            <a href="{{ route('purchase-orders.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+            <a href="{{ route('purchase-orders.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                 <i class="fas fa-arrow-left mr-2"></i>Kembali
             </a>
         </div>
@@ -13,11 +13,11 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             {{-- Kartu Informasi Utama --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 border-b">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Informasi Pesanan</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-300">Informasi Pesanan</h3>
                         </div>
                         {{-- Tombol aksi hanya muncul jika status 'pending' --}}
                         @if($purchaseOrder->status == 'pending')
@@ -36,34 +36,34 @@
                     </div>
                     <dl class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                         <div>
-                            <dt class="font-medium text-gray-500">Nomor Pesanan</dt>
-                            <dd class="mt-1 text-gray-900 font-semibold">#{{ $purchaseOrder->id }}</dd>
+                            <dt class="font-medium text-gray-500 dark:text-gray-100">Nomor Pesanan</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-300 font-semibold">#{{ $purchaseOrder->id }}</dd>
                         </div>
                         <div>
-                            <dt class="font-medium text-gray-500">Pemasok</dt>
-                            <dd class="mt-1 text-gray-900">{{ $purchaseOrder->supplier->name }}</dd>
+                            <dt class="font-medium text-gray-500 dark:text-gray-100">Pemasok</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-300">{{ $purchaseOrder->supplier->name }}</dd>
                         </div>
                         <div>
-                            <dt class="font-medium text-gray-500">Status</dt>
+                            <dt class="font-medium text-gray-500 dark:text-gray-100">Status</dt>
                             <dd class="mt-1"><x-status-badge :status="$purchaseOrder->status" /></dd>
                         </div>
                         <div>
-                            <dt class="font-medium text-gray-500">Dibuat Oleh</dt>
-                            <dd class="mt-1 text-gray-900">{{ $purchaseOrder->user->name }}</dd>
+                            <dt class="font-medium text-gray-500 dark:text-gray-100">Dibuat Oleh</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-300">{{ $purchaseOrder->user->name }}</dd>
                         </div>
                         <div>
-                            <dt class="font-medium text-gray-500">Tanggal</dt>
-                            <dd class="mt-1 text-gray-900">{{ $purchaseOrder->created_at->format('d M Y, H:i') }}</dd>
+                            <dt class="font-medium text-gray-500 dark:text-gray-100">Tanggal</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-300">{{ $purchaseOrder->created_at->format('d M Y, H:i') }}</dd>
                         </div>
                          <div class="sm:col-span-3">
-                            <dt class="font-medium text-gray-500">Catatan</dt>
-                            <dd class="mt-1 text-gray-900">{{ $purchaseOrder->notes ?? '-' }}</dd>
+                            <dt class="font-medium text-gray-500 dark:text-gray-100">Catatan</dt>
+                            <dd class="mt-1 text-gray-900 dark:text-gray-300">{{ $purchaseOrder->notes ?? '-' }}</dd>
                         </div>
                     </dl>
                 </div>
 
                 @if($purchaseOrder->status == 'pending')
-                <div class="p-6 bg-gray-50 border-t flex justify-end">
+                <div class="p-6 bg-gray-50 dark:bg-gray-800 border-t flex justify-end">
                     <form action="{{ route('purchase-orders.receive', $purchaseOrder->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menandai pesanan ini sebagai DITERIMA? Stok produk akan ditambahkan secara otomatis.')">
                         @csrf
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
@@ -75,38 +75,38 @@
             </div>
 
             {{-- Kartu Detail Produk --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Produk dalam Pesanan</h3>
-                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-300 mb-4">Produk dalam Pesanan</h3>
+                    <div class="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produk</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Jumlah</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Harga/Unit</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Subtotal</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Produk</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Jumlah</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Harga/Unit</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @php $grandTotal = 0; @endphp
                                 @foreach ($purchaseOrder->products as $product)
                                     @php
                                         $subtotal = $product->pivot->quantity * $product->pivot->price;
                                         $grandTotal += $subtotal;
                                     @endphp
-                                    <tr>
-                                        <td class="px-6 py-4">{{ $product->name }}</td>
-                                        <td class="px-6 py-4 text-center">{{ $product->pivot->quantity }}</td>
-                                        <td class="px-6 py-4 text-right">Rp {{ number_format($product->pivot->price, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-4 text-right">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td class="px-6 py-4 dark:text-gray-300">{{ $product->name }}</td>
+                                        <td class="px-6 py-4 dark:text-gray-300 text-center">{{ $product->pivot->quantity }}</td>
+                                        <td class="px-6 py-4 dark:text-gray-300 text-right">Rp {{ number_format($product->pivot->price, 0, ',', '.') }}</td>
+                                        <td class="px-6 py-4 dark:text-gray-300 text-right">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
-                             <tfoot class="bg-gray-50">
+                             <tfoot class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <td colspan="3" class="px-6 py-3 text-right font-bold text-gray-700 uppercase">Total Keseluruhan</td>
-                                    <td class="px-6 py-3 text-right font-bold text-gray-900">Rp {{ number_format($grandTotal, 0, ',', '.') }}</td>
+                                    <td colspan="3" class="px-6 py-3 text-right font-bold text-gray-700 dark:text-gray-300 uppercase">Total Keseluruhan</td>
+                                    <td class="px-6 py-3 text-right font-bold text-gray-900 dark:text-gray-300">Rp {{ number_format($grandTotal, 0, ',', '.') }}</td>
                                 </tr>
                             </tfoot>
                         </table>

@@ -1,13 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Riwayat Barang Keluar') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
                     @if (session('success'))
@@ -23,44 +23,42 @@
                         </a>
                     </div>
 
-                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <div class="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="px-6 py-3 ...">Produk</th>
-                                    <th class="px-6 py-3 ...">Tipe</th>
-                                    <th class="px-6 py-3 ...">Jumlah</th>
-                                    <th class="px-6 py-3 ...">Status</th>
-                                    <th class="px-6 py-3 ...">Tanggal</th>
-                                    <th class="px-6 py-3 ...">Aksi</th>
+                                    <th class="px-6 py-3 dark:text-gray-300 text-left">Produk</th>
+                                    <th class="px-6 py-3 dark:text-gray-300 text-left">Tipe</th>
+                                    <th class="px-6 py-3 dark:text-gray-300 text-left">Jumlah</th>
+                                    <th class="px-6 py-3 dark:text-gray-300 text-left">Status</th>
+                                    <th class="px-6 py-3 dark:text-gray-300 text-left">Tanggal</th>
+                                    <th class="px-6 py-3 dark:text-gray-300 text-left">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse ($stockOuts as $movement)
-                                    <tr class="hover:bg-gray-50 {{ $movement->status === 'cancelled' ? 'bg-gray-50' : '' }}">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 {{ $movement->status === 'cancelled' ? 'bg-gray-50 dark:bg-gray-800' : '' }}">
                                         <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $movement->product->name ?? 'Produk Dihapus' }}</div>
-                                            <div class="text-sm text-gray-500">{{ $movement->notes }}</div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-300">{{ $movement->product->name ?? 'Produk Dihapus' }}</div>
+                                            <div class="text-sm text-gray-500 dark:text-gray-300">{{ $movement->notes }}</div>
                                         </td>
-                                        <td class="px-6 py-4"><x-status-badge :status="$movement->type" /></td>
+                                        <td class="px-6 py-4 dark:text-gray-300"><x-status-badge :status="$movement->type" /></td>
                                         <td class="px-6 py-4 text-center font-bold text-red-600">{{ $movement->quantity }}</td>
                                         <td class="px-6 py-4">
-                                            {{-- [PERBAIKAN] Tampilkan Status Transaksi --}}
                                             <x-status-badge :status="$movement->status" />
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">{{ $movement->created_at->format('d M Y, H:i') }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">{{ $movement->created_at->format('d M Y, H:i') }}</td>
                                         <td class="px-6 py-4 text-center">
-                                            {{-- [PERBAIKAN] Logika Tombol Aksi --}}
                                             @if($movement->status === 'completed')
                                                 <form action="{{ route('stock-out.cancel', $movement->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin membatalkan transaksi ini? Stok akan dikembalikan.')">
                                                     @csrf
-                                                    <button type="submit" class="text-yellow-600 hover:text-yellow-900 font-semibold text-xs">Batalkan</button>
+                                                    <button type="submit" class="text-yellow-600 hover:text-yellow-900 dark:hover:text-yellow-400 font-semibold text-xs">Batalkan</button>
                                                 </form>
                                             @elseif($movement->status === 'cancelled')
                                                 <form action="{{ route('stock-out.destroy', $movement->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus catatan ini? Aksi ini tidak bisa dibatalkan.')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900 font-semibold text-xs">Hapus</button>
+                                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:hover:text-red-400 font-semibold text-xs">Hapus</button>
                                                 </form>
                                             @else
                                                 <span class="text-gray-400">-</span>

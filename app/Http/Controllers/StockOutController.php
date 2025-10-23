@@ -49,13 +49,25 @@ class StockOutController extends Controller
         if ($product->stock < $validated['quantity']) {
             return back()->with('error', 'Stok tidak mencukupi. Sisa stok: ' . $product->stock)->withInput();
         }
+        try {
+            DB::transaction(function () use ($product, $validated, $request) {
+                $this->recordStockMovement(
+                    $product,
+                    -1 * $validated['quantity'],
+                    $validated['type'],
+                    ['notes' => $validated['notes']]
+                );
 
-        $this->recordStockMovement(
-            $product,
-            -1 * $validated['quantity'],
-            $validated['type'],
-            ['notes' => $validated['notes']]
-        );
+                // LOGGING
+                auth()->user()->activityLogs()->create([
+                    'activity'      => "Menambahkan barang keluar: ({$validated['type']}): {$product->name} (Qty: {$validated['quantity']})",
+                    'ip_address'    => $request->ip(),
+                    'user_agent'    => $request->header('User-Agent')
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mencatat barang keluar: ' . $e->getMessage());
+        }
 
         return redirect()->route('stock-out.index', $product)->with('success', 'Barang keluar berhasil dicatat dan stok telah diupdate.');
     }
@@ -93,14 +105,21 @@ class StockOutController extends Controller
             return back()->with('error', 'Hanya transaksi yang sudah dibatalkan yang bisa dihapus.');
         }
 
-        $stockMovement->delete();
+        try {
+            $stockMovementId = $stockMovement->id;
+            $productName = $stockMovement->product->name;
 
-        // LOGGING
-        auth()->user()->activityLogs()->create([
-            'activity'   => "Menghapus catatan transaksi yang dibatalkan: #{$stockMovement->id}",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->header('User-Agent'),
-        ]);
+            $stockMovement->delete();
+
+            // LOGGING
+            auth()->user()->activityLogs()->create([
+                'activity'   => "Menghapus catatan (dibatalkan): #{$stockMovementId} ({$productName})",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->header('User-Agent'),
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus catatan: ' . $e->getMessage());
+        }
 
         return redirect()->route('stock-out.index')->with('success', 'Catatan transaksi yang dibatalkan berhasil dihapus.');
     }
@@ -111,23 +130,28 @@ class StockOutController extends Controller
             return back()->with('error', 'Hanya transaksi yang sudah selesai yang bisa dibatalkan.');
         }
 
-        DB::transaction(function () use ($stockMovement) {
-            $this->recordStockMovement(
-                $stockMovement->product,
-                -1 * $stockMovement->quantity,
-                'pembatalan',
-                ['notes' => "Pembatalan transaksi barang keluar #" . $stockMovement->id]
-            );
+        try {
+            DB::transaction(function () use ($stockMovement, $request) {
 
-            $stockMovement->status = 'cancelled';
-            $stockMovement->save();
-        });
+                $this->recordStockMovement(
+                    $stockMovement->product,
+                    -1 * $stockMovement->quantity,
+                    'pembatalan',
+                    ['notes' => "Pembatalan transaksi barang keluar #" . $stockMovement->id]
+                );
 
-        auth()->user()->activityLogs()->create([
-            'activity'   => "Membatalkan transaksi barang keluar: #{$stockMovement->id}",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->header('User-Agent'),
-        ]);
+                $stockMovement->status = 'cancelled';
+                $stockMovement->save();
+
+                auth()->user()->activityLogs()->create([
+                    'activity'   => "Membatalkan transaksi barang keluar: #{$stockMovement->id} ({$stockMovement->product->name})",
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal membatalkan transaksi: ' . $e->getMessage());
+        }
 
         return redirect()->route('stock-out.index')->with('success', 'Transaksi berhasil dibatalkan dan stok telah dikembalikan.');
     }

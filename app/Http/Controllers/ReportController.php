@@ -98,7 +98,7 @@ class ReportController extends Controller
 
         if ($stockOpname) {
             auth()->user()->activityLogs()->create([
-                'activity'   => "Mengirim laporan stok opname baru: #{$stockOpname->id}",
+                'activity'   => "Mengirim laporan stok opname baru: #{$stockOpname->name}",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->header('User-Agent'),
             ]);

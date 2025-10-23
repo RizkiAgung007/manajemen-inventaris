@@ -14,12 +14,13 @@
 
     </head>
     <body class="font-sans antialiased">
-        <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100">
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen bg-gray-100 dark:bg-gray-900">
 
             <button
                 x-show="!sidebarOpen"
                 @click="sidebarOpen = true"
-                class="fixed top-4 left-4 z-30 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition">
+                class="fixed top-4 left-4 z-30 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition"
+            >
                 <i class="fas fa-bars text-lg"></i>
             </button>
 
@@ -31,7 +32,8 @@
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="translate-x-0"
                 x-transition:leave-end="-translate-x-full"
-                class="w-64 bg-gray-800 text-white fixed inset-y-0 left-0 z-20 flex flex-col">
+                class="w-64 bg-gray-800 text-white fixed inset-y-0 left-0 z-20 flex flex-col"
+            >
 
                 <div class="flex items-center justify-between p-4 border-b border-gray-700">
                     <a href="{{ route('dashboard') }}"><h2 class="text-lg font-bold">Menu Inventaris</h2></a>
@@ -133,7 +135,7 @@
                 @include('layouts.navigation')
 
                 @if (isset($header))
-                    <header class="bg-white shadow">
+                    <header class="bg-white dark:bg-gray-800 shadow">
                         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
