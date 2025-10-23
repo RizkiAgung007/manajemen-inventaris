@@ -12,7 +12,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
 
                 {{-- Kartu Total Produk --}}
-                <a href="{{ route('products.index') }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <a href="{{ route('products.index') }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg dark:hover:shadow-gray-700 hover:scale-105 transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Produk</p>
@@ -25,7 +25,7 @@
                 </a>
 
                 {{-- Kartu Total Kategori --}}
-                <a href="{{ route('categories.index') }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <a href="{{ route('categories.index') }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg dark:hover:shadow-gray-700 hover:scale-105 transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Kategori</p>
@@ -38,7 +38,7 @@
                 </a>
 
                 {{-- Kartu Stok Kritis --}}
-                <a href="{{ route('products.index', ['sort' => 'stock_asc']) }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <a href="{{ route('products.index', ['sort' => 'stock_asc']) }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg dark:hover:shadow-gray-700 hover:scale-105 transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Produk Stok Kritis</p>
@@ -52,7 +52,7 @@
 
                 {{-- Kartu Total Pengguna --}}
                 @can('manage-users')
-                <a href="{{ route('users.index') }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <a href="{{ route('users.index') }}" class="block bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-lg dark:hover:shadow-gray-700 hover:scale-105 transition-all duration-300">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Pengguna</p>

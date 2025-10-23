@@ -26,7 +26,7 @@ class StockOpnameReviewController extends Controller
 
     public function show(StockOpname $stockOpname)
     {
-        $stockOpname->load('details.product.category', 'user');
+        $stockOpname->load('details.product.categories', 'user');
 
         return view('reviews.show', compact('stockOpname'));
     }
