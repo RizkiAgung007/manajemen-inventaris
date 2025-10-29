@@ -8,14 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 trait ManagesStock
 {
-    /**
-     * Mencatat pergerakan stok dan memperbarui jumlah stok produk.
-     *
-     * @param Product $product Produk yang stoknya berubah.
-     * @param int $quantity Jumlah perubahan (bisa positif atau negatif).
-     * @param string $type Tipe transaksi.
-     * @param array $options Opsi tambahan seperti notes.
-     */
     protected function recordStockMovement(Product $product, int $quantity, string $type, array $options = [], bool $updateStock = true)
     {
         DB::transaction(function () use ($product, $quantity, $type, $options, $updateStock) {

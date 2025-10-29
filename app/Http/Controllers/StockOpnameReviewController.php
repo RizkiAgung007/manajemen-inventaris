@@ -37,16 +37,22 @@ class StockOpnameReviewController extends Controller
             return redirect()->route('reviews.show', $stockOpname)->with('error', 'Laporan ini sudah diproses sebelumnya.');
         }
 
+        $stockOpname->load('details.product');
+
         DB::transaction(function () use ($stockOpname) {
             foreach ($stockOpname->details as $detail) {
-                $product = Product::find($detail->product_id);
+
+                $product = $detail->product;
                 if ($product) {
                     $quantityChange = $detail->physical_stock - $detail->system_stock;
 
-                    $this->recordStockMovement($product, $quantityChange, 'stok_opname', [
-                        'notes' => "Dari Laporan Stok Opname #" . $stockOpname->id
-                    ]);
+                    if ($quantityChange != 0) {
+                        $product->increment('stock', $quantityChange);
 
+                        $this->recordStockMovement($product, $quantityChange, 'stok_opname', [
+                            'notes' => "Dari Laporan Stok Opname #" . $stockOpname->id
+                        ], false);
+                    }
                 }
             }
 

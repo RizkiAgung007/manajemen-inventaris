@@ -107,7 +107,7 @@ class ProductController extends Controller
         if ($product->stock > 0) {
             $this->recordStockMovement($product, $product->stock, 'stok_awal', [
                 'notes' => 'Stok awal saat dibuat'
-            ]);
+            ], false);
         }
 
         // LOGGING

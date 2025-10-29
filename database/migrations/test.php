@@ -1,43 +1,42 @@
-    <?php
-
-    namespace Database\Seeders;
-
-    use App\Models\User;
-    use Illuminate\Database\Seeder;
-    use Illuminate\Support\Facades\Hash; // Jangan lupa import Hash
-
-    class DatabaseSeeder extends Seeder
-    {
-        /**
-         * Seed the application's database.
-         */
-        public function run(): void
-        {
-            // Hapus atau komentari User::factory(10)->create(); jika ada
-
-            // Buat 1 pengguna spesifik Anda
-            User::create([
-                'name' => 'Rizki',
-                'email' => 'rizki@example.com',
-                'password' => Hash::make('qwertyuiop[]'),
-                'role' => 'superadmin' // atau 'admin', sesuaikan dengan sistem Anda
-            ]);
-
-            // (Opsional) Buat beberapa pengguna palsu lainnya
-            // User::factory(5)->create();
-
-            // (Opsional) Panggil seeder Anda yang lain jika ada
-            // $this->call([
-            //     CategorySeeder::class,
-            //     ProductSeeder::class,
-            // ]);
-        }
+public function approve(StockOpname $stockOpname, Request $request)
+{
+    if ($stockOpname->status !== 'pending') {
+        return redirect()->route('reviews.show', $stockOpname)->with('error', 'Laporan ini sudah diproses sebelumnya.');
     }
-    ```
 
-3.  Setelah Anda menyimpan file itu, kembali ke **terminal Ubuntu (WSL)** Anda.
-4.  Jalankan perintah ini. Ini akan menghapus database, membuat ulang tabel, DAN menjalankan Seeder Anda:
+    // --- TAMBAHKAN BARIS INI ---
+    // Eager load relasi detail dan produknya SEBELUM transaksi
+    $stockOpname->load('details.product');
 
-    ```bash
-    ./vendor/bin/sail artisan migrate:fresh --seed
+    DB::transaction(function () use ($stockOpname) {
 
+        // Sekarang $stockOpname->details sudah berisi produknya
+        foreach ($stockOpname->details as $detail) {
+
+            // --- UBAH BARIS INI ---
+            // Ambil produk dari relasi yang sudah di-load, JANGAN query lagi
+            $product = $detail->product;
+
+            if ($product) {
+                $quantityChange = $detail->physical_stock - $detail->system_stock;
+
+                if ($quantityChange != 0) {
+                    $product->increment('stock', $quantityChange);
+
+                    $this->recordStockMovement($product, $quantityChange, 'stok_opname', [
+                        'notes' => "Dari Laporan Stok Opname #" . $stockOpname->id
+                    ], false);
+                }
+            }
+        }
+
+        $stockOpname->status = 'approved';
+        $stockOpname->save();
+    });
+
+    auth()->user()->activityLogs()->create([
+        //... sisa kode Anda
+    ]);
+
+    return redirect()->route('reviews.index')->with('success', 'Laporan berhasil disetujui.');
+}
